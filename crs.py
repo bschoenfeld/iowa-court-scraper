@@ -1,9 +1,3 @@
-from bs4 import BeautifulSoup
-from openpyxl import load_workbook
-from os import listdir
-from pprint import pprint
-import parser
-
 code_map = {
     "GUILTY": "GTR",
     "GUILTY BY COURT": "GTR",
@@ -68,50 +62,3 @@ def get_finance_column(detail):
     if "DELINQUENT REVOLVING FUND" in detail:
         return "S" # UNKNOWN
     return None
-
-wb = load_workbook('CRS 2.3.2.xlsx')
-ws = wb['CASE DATA']
-
-case_ids = []
-files = listdir("./cases/")
-for f in files:
-    if f.endswith(".html") and f != "search_results.html":
-        case_ids.append(f.split("_")[0])
-case_ids = list(set(case_ids))
-print len(case_ids)
-
-unknowns = []
-cur_row = 4
-for case_id in case_ids:
-    case = {'id': case_id}
-    #print "Collecting " + case['id']
-
-    with open("cases/" + case['id'] + "_summary.html", "r") as text_file:
-        parser.parse_case_summary(text_file.read(), case)
-
-    with open("cases/" + case['id'] + "_charges.html", "r") as text_file:
-        parser.parse_case_charges(text_file.read(), case)
-
-    with open("cases/" + case['id'] + "_financials.html", "r") as text_file:
-        parser.parse_case_financials(text_file.read(), case)
-
-    dispositions = [(c['disposition'], c['dispositionDate']) for c in case['charges']]
-    #print case['id']
-    #print dispositions
-    #get_disposition_code(dispositions)
-
-    for f in case['financials']:
-        if not f['detail'].strip():
-            continue
-        col = get_finance_column(f['detail'])
-        if col is None:
-            unknowns.append(f['detail'])
-
-    i = str(cur_row)
-    ws['A' + i] = case['id']
-    ws['B' + i] = case['county']
-    cur_row += 1
-
-pprint(set(unknowns))
-wb.save("CRS 2.3.2_test.xlsx")
-        

@@ -4,12 +4,19 @@ from reader import Reader
 import os
 import parser
 
-first = "Allen"
-last = "Adams"
+# TODO - Detect "Your query returned more than 200 records"
+
+first = "GEORGE"
+last = "BROWN"
+
+print os.environ['username'], os.environ['password']
 
 reader = Reader(Opener())
 reader.init()
-reader.login(os.environ['username'], os.environ['password'])
+result = reader.login(os.environ['username'], os.environ['password'])
+if "The userID or password could not be validated" in result:
+    print "Login failed"
+    exit()
 
 try:
     print "Searching"
