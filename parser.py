@@ -12,8 +12,8 @@ def parse_search(html):
         case = {
             'id': list(cols[0].stripped_strings)[0].replace(u'\xa0', u' '),
             'title': cols[1].string,
-            'name': cols[2].string,
-            'dob': cols[3].string,
+            'name': cols[2].string.strip(),
+            'dob': cols[3].string.replace(u'\xa0', u''),
             'role': cols[4].string
         }
         if case['id'] == 'Case ID':

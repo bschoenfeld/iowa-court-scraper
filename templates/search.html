@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h3>Results</h3>
+    <form action="/crs" method="post">
+        {% for key in keys %}
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="caseIds" value="{{ cases[key] }}">
+                <label class="form-check-label">
+                    {{ key }}
+                </label>
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Create CRS</button>
+    </form>
+
+{% endblock %}
