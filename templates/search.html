@@ -2,7 +2,7 @@
 
 {% block content %}
     <h3>Results</h3>
-    <form action="/crs" method="post">
+    <form id="crs" action="/crs" method="post">
         {% for key in keys %}
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="caseIds" value="{{ cases[key] }}">
@@ -11,7 +11,18 @@
                 </label>
             </div>
         {% endfor %}
-        <button type="submit" class="btn btn-primary">Create CRS</button>
+        <button id="crs-submit-button" type="submit" class="btn btn-primary">Create CRS</button>
     </form>
+    <a href="/" class="btn">New Search</button>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#crs").submit(function () {
+                $("#crs-submit-button").attr("disabled", true);
+                return true;
+            });
+        });
+    </script>
 
 {% endblock %}
