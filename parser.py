@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 
 def parse_search(html):
-    with open("search_results.html", "w") as text_file:
+    with open("/tmp/search_results.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
     cases = []
@@ -22,13 +22,13 @@ def parse_search(html):
     return cases
 
 def parse_case_summary(html, case):
-    with open("cases/" + case['id'] + "_summary.html", "w") as text_file:
+    with open("/tmp/" + case['id'] + "_summary.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
     case['county'] = soup.find_all('tr')[2].find_all('td')[1].string
 
 def parse_case_charges(html, case):
-    with open("cases/" + case['id'] + "_charges.html", "w") as text_file:
+    with open("/tmp/" + case['id'] + "_charges.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
     charges = []
@@ -78,7 +78,7 @@ def parse_case_charges(html, case):
     case['charges'] = charges
 
 def parse_case_financials(html, case):
-    with open("cases/" + case['id'] + "_financials.html", "w") as text_file:
+    with open("/tmp/" + case['id'] + "_financials.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
     financials = []
