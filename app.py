@@ -13,11 +13,33 @@ app.secret_key = "NOTASECRET"
 
 def get_reader():
     reader = Reader(Opener())
-    reader.init()
-    result = reader.login(os.environ['username'], os.environ['password'])
-    if "The userID or password could not be validated" in result:
-        return None
+    if 'cookies' in session:
+        print "Loading cookies"
+        reader.opener.load_cookies(session['cookies'])
+    else:
+        print "Logging in"
+        reader.init()
+        result = reader.login(os.environ['username'], os.environ['password'])
+
+        if "The userID or password could not be validated" in result:
+            print "Bad User ID or password"
+            return None
+
+        if "Concurrent Login Error" in result:
+            print "User already logged in"
+            return None
+
+        print "Logged in"
     return reader
+
+def sleep_reader(reader):
+    print "Saving cookies"
+    session['cookies'] = reader.opener.get_cookies()
+
+def close_reader(reader):
+    print "Logging off"
+    reader.logoff()
+    session.pop('cookies', None)
 
 @app.route('/')
 def index():
@@ -37,7 +59,7 @@ def search():
 
     print "Searching ", session['firstname'], session['lastname']
     result = reader.search(session['firstname'], session['lastname'])
-    reader.logoff()
+    sleep_reader(reader)
 
     #result = None
     #with open("search_results.html", "r") as text_file:
@@ -70,8 +92,8 @@ def get_crs():
     if reader is None:
         return "ERROR"
 
-    print "Searching ", session['firstname'], session['lastname']
-    result = reader.search(session['firstname'], session['lastname'])
+    #print "Searching ", session['firstname'], session['lastname']
+    #result = reader.search(session['firstname'], session['lastname'])
 
     data = request.form.getlist('caseIds')
     case_ids = [case_id for ids in data for case_id in ast.literal_eval(ids)]
@@ -104,8 +126,8 @@ def get_crs():
         crs.process_case(case, ws, row)
         row += 1
 
-    reader.logoff()
-    
+    close_reader(reader)
+
     wb.save("/tmp/CRS 2.3.2_test.xlsx")
     return send_file("/tmp/CRS 2.3.2_test.xlsx")
 
