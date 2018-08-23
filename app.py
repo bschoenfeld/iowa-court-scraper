@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, send_file, session
+from flask import Flask, jsonify, render_template, request, send_file, session
 from opener import Opener
 from openpyxl import load_workbook
 from pprint import pprint
 from reader import Reader
 import ast
 import crs
+import json
 import os
 import parser
 
@@ -54,11 +55,11 @@ def search():
     if reader is None:
         return "ERROR"
 
-    session['firstname'] = request.form['firstname']
-    session['lastname'] = request.form['lastname']
+    firstname = request.form['firstname']
+    lastname = request.form['lastname']
 
-    print "Searching ", session['firstname'], session['lastname']
-    result = reader.search(session['firstname'], session['lastname'])
+    print "Searching ", firstname, lastname
+    result = reader.search(firstname, lastname)
     sleep_reader(reader)
 
     #result = None
@@ -83,53 +84,77 @@ def search():
     keys = sorted([key for key in case_dict])
     return render_template('search.html', cases=case_dict, keys=keys)
 
-@app.route('/crs', methods=['POST'])
-def get_crs():
-    if 'firstname' not in session:
+@app.route('/case', methods=['POST'])
+def get_case_details():
+    if 'cookies' not in session:
         return "ERROR"
 
     reader = get_reader()
     if reader is None:
         return "ERROR"
 
-    #print "Searching ", session['firstname'], session['lastname']
-    #result = reader.search(session['firstname'], session['lastname'])
+    case = {'id': request.form['caseId']}
+    print case
 
-    data = request.form.getlist('caseIds')
-    case_ids = [case_id for ids in data for case_id in ast.literal_eval(ids)]
+    result = reader.case_summary(case['id'])
+    parser.parse_case_summary(result, case)
+
+    result = reader.case_charges()
+    parser.parse_case_charges(result, case)
+
+    result = reader.case_financials()
+    parser.parse_case_financials(result, case)
+
+    #with open("cases/" + case['id'] + "_summary.html", "r") as text_file:
+    #    parser.parse_case_summary(text_file.read(), case)
+
+    #with open("cases/" + case['id'] + "_charges.html", "r") as text_file:
+    #    parser.parse_case_charges(text_file.read(), case)
+
+    #with open("cases/" + case['id'] + "_financials.html", "r") as text_file:
+    #    parser.parse_case_financials(text_file.read(), case)
     
+    return jsonify(case)
+
+@app.route('/crs', methods=['GET', 'POST'])
+def generate_crs():
+    if request.method == 'GET':
+        if 'file' not in session:
+            return "ERROR"
+        path = session['file']
+        session.pop('file', None)
+        return send_file(path)
+
+    if 'cookies' not in session:
+        return "ERROR"
+
+    reader = get_reader()
+    if reader is None:
+        return "ERROR"
+    close_reader(reader)
+    session.pop('cookies', None)
+
+    data = json.loads(request.data)
+
     wb = load_workbook('CRS 2.3.2.xlsx')
     ws = wb['CASE DATA']
     row = 4
 
-    for case_id in case_ids:
-        case = {'id': case_id}
-        print "Collecting " + case['id']
-        result = reader.case_summary(case['id'])
-        parser.parse_case_summary(result, case)
-
-        result = reader.case_charges()
-        parser.parse_case_charges(result, case)
-
-        result = reader.case_financials()
-        parser.parse_case_financials(result, case)
-
-        #with open("cases/" + case['id'] + "_summary.html", "r") as text_file:
-        #    parser.parse_case_summary(text_file.read(), case)
-
-        #with open("cases/" + case['id'] + "_charges.html", "r") as text_file:
-        #    parser.parse_case_charges(text_file.read(), case)
-
-        #with open("cases/" + case['id'] + "_financials.html", "r") as text_file:
-        #    parser.parse_case_financials(text_file.read(), case)
-        
+    for case in data['cases']:
+        print "Adding " + case['id']
         crs.process_case(case, ws, row)
         row += 1
 
-    close_reader(reader)
-
     wb.save("/tmp/CRS 2.3.2_test.xlsx")
-    return send_file("/tmp/CRS 2.3.2_test.xlsx")
+    session['file'] = "/tmp/CRS 2.3.2_test.xlsx"
+    return jsonify({'result': "success"})
+
+@app.template_filter('pluralize')
+def pluralize(number, singular = '', plural = 's'):
+    if number == 1:
+        return singular
+    else:
+        return plural
 
 if __name__ == "__main__":
 	app.run()
