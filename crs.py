@@ -46,6 +46,11 @@ def get_primary_charge(charges):
     return charge
 
 def get_finance_column(detail):
+    if "COLLECTION BY CO ATTY" in detail:
+        return "S" # UNKNOWN
+    if "DELINQUENT REVOLVING FUND" in detail:
+        return "S" # UNKNOWN
+        
     if "FINE" in detail:
         return "J" # FINE
     if "DEFERRED JUDGMENT CIVIL PENALTY" in detail:
@@ -80,11 +85,6 @@ def get_finance_column(detail):
 
     if "SHERIFF" in detail:
         return "Q" # SHERIFF
-
-    if "COLLECTION BY CO ATTY" in detail:
-        return "S" # UNKNOWN
-    if "DELINQUENT REVOLVING FUND" in detail:
-        return "S" # UNKNOWN
 
     return "R" # MISC
 
