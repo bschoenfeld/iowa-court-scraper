@@ -1,6 +1,7 @@
 import cookielib
-import urllib2
+import os
 import pickle
+import urllib2
 
 user_agent = u"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; " + \
     u"rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11"
