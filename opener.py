@@ -10,12 +10,12 @@ class Opener:
     def __init__(self):
         self.cookieJar = cookielib.CookieJar()
         cookie_processor = urllib2.HTTPCookieProcessor(self.cookieJar)
-        if os.environ.get('PROXIMO_URL', '') != '':
-            proxy = urllib2.ProxyHandler({'http': os.environ.get('PROXIMO_URL', '')})
-            auth = urllib2.HTTPBasicAuthHandler()
-            self.opener = urllib2.build_opener(cookie_processor, proxy, auth, urllib2.HTTPHandler)
-        else:
-            self.opener = urllib2.build_opener(cookie_processor)
+        #if os.environ.get('PROXIMO_URL', '') != '':
+        #    proxy = urllib2.ProxyHandler({'http': os.environ.get('PROXIMO_URL', '')})
+        #    auth = urllib2.HTTPBasicAuthHandler()
+        #    self.opener = urllib2.build_opener(cookie_processor, proxy, auth, urllib2.HTTPHandler)
+        #else:
+        self.opener = urllib2.build_opener(cookie_processor)
         self.opener.addheaders = [('User-Agent', user_agent)]
 
     def get_cookies(self):
