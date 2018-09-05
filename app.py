@@ -136,7 +136,7 @@ def generate_crs():
 
     data = json.loads(request.data)
 
-    wb = load_workbook('CRS 2.3.2.xlsx')
+    wb = load_workbook('CRS 2.3.3.xlsx')
     ws = wb['CASE DATA']
     row = 4
 
@@ -145,8 +145,9 @@ def generate_crs():
         crs.process_case(case, ws, row)
         row += 1
 
-    wb.save("/tmp/CRS 2.3.2_test.xlsx")
-    session['file'] = "/tmp/CRS 2.3.2_test.xlsx"
+    fp = "/tmp/CRS 2.3.3.xlsx"
+    wb.save(fp)
+    session['file'] = fp
     return jsonify({'result': "success"})
 
 @app.template_filter('pluralize')
