@@ -24,14 +24,14 @@ def get_reader():
 
         if "The userID or password could not be validated" in result:
             print "Bad User ID or password"
-            return None
+            return (None, "Bad User ID or password")
 
         if "Concurrent Login Error" in result:
             print "User already logged in"
-            return None
+            return (None, "User already logged in")
 
         print "Logged in"
-    return reader
+    return (reader, "")
 
 def sleep_reader(reader):
     print "Saving cookies"
@@ -49,11 +49,11 @@ def index():
 @app.route('/search', methods=['POST'])
 def search():
     if request.form['password'] != os.environ['password']:
-        return "ERROR"
+        return "Password does not match the one stored in Iowa CRS app"
 
-    reader = get_reader()
+    reader, error = get_reader()
     if reader is None:
-        return "ERROR"
+        return error
 
     firstname = request.form['firstname']
     lastname = request.form['lastname']
@@ -87,11 +87,11 @@ def search():
 @app.route('/case', methods=['POST'])
 def get_case_details():
     if 'cookies' not in session:
-        return "ERROR"
+        return "Bad session"
 
-    reader = get_reader()
+    reader, error = get_reader()
     if reader is None:
-        return "ERROR"
+        return error
 
     case = {'id': request.form['caseId']}
     print case
@@ -120,17 +120,17 @@ def get_case_details():
 def generate_crs():
     if request.method == 'GET':
         if 'file' not in session:
-            return "ERROR"
+            return "Bad session - no file"
         path = session['file']
         session.pop('file', None)
         return send_file(path)
 
     if 'cookies' not in session:
-        return "ERROR"
+        return "Bad session"
 
-    reader = get_reader()
+    reader, error = get_reader()
     if reader is None:
-        return "ERROR"
+        return error
     close_reader(reader)
     session.pop('cookies', None)
 
