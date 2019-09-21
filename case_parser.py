@@ -4,6 +4,9 @@ def parse_search(html):
     with open("/tmp/search_results.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
+    too_many_results = len(soup.find_all(text="Your query returned more than 200 records.")) > 0
+    if too_many_results:
+        print "Too Many Results"
     cases = []
     for row in soup.find_all('tr'):
         cols = row.find_all('td')
@@ -19,7 +22,7 @@ def parse_search(html):
         if case['id'] == 'Case ID':
             continue
         cases.append(case)
-    return cases
+    return (cases, too_many_results)
 
 def parse_case_summary(html, case):
     with open("/tmp/" + case['id'] + "_summary.html", "w") as text_file:

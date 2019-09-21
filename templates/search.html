@@ -2,6 +2,15 @@
 
 {% block content %}
     <h3>Results</h3>
+
+    {% if too_many_results %}
+        <div class="alert alert-warning">
+            <div>Your query returned more than 200 records.</div>
+            <div>A subset of the results (the first 200 records found) is shown below.</div>
+            <div>To get full results, go back to the search screen and narrow your search.</div>
+        </div>
+    {% endif %}
+    
     <form id="crs">
         {% for key in keys %}
             <div class="form-check">

@@ -80,10 +80,11 @@ def search():
         return error
 
     firstname = request.form['firstname']
+    middlename = request.form['middlename']
     lastname = request.form['lastname']
 
-    print "Searching ", firstname, lastname
-    result = reader.search(firstname, lastname)
+    print "Searching ", firstname, middlename, lastname
+    result = reader.search(firstname, middlename, lastname)
     sleep_reader(reader)
 
     #result = None
@@ -91,7 +92,7 @@ def search():
     #    result = text_file.read()
 
     print "Parsing results"
-    cases = case_parser.parse_search(result)
+    cases, too_many_results = case_parser.parse_search(result)
 
     case_dict = {}
     for case in cases:
@@ -106,7 +107,7 @@ def search():
             case_dict[key] = []
         case_dict[key].append(case['id'])
     keys = sorted([key for key in case_dict])
-    return render_template('search.html', cases=case_dict, keys=keys)
+    return render_template('search.html', cases=case_dict, keys=keys, too_many_results=too_many_results)
 
 @app.route('/case', methods=['POST'])
 def get_case_details():

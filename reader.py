@@ -31,13 +31,13 @@ class Reader:
         ])
         return self.opener.open(url, data).read()
 
-    def search(self, firstname, lastname):
+    def search(self, firstname, middlename, lastname):
         url = build_url("TrialCaseSearchResultServlet")
         data = urllib.urlencode([
             ('searchtype', "N"),
             ('last', lastname),
             ('first', firstname),
-            ('middle', ""),
+            ('middle', middlename),
             ('alast', ""),
             ('afirst', ""),
             ('amiddle', ""),
