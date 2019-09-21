@@ -12,7 +12,7 @@ import case_parser
 app = Flask(__name__)
 app.secret_key = "NOTASECRET"
 
-def get_reader(use_cookie_file=False):
+def get_reader(username=None, password=None, use_cookie_file=False):
     reader = Reader(Opener())
     if 'cookies' in session:
         print "Loading cookies"
@@ -23,14 +23,17 @@ def get_reader(use_cookie_file=False):
             cookies = text_file.read()
             print cookies
             reader.opener.load_cookies(cookies)
+    elif username is None:
+        print "Cannot login, no username provided"
+        return (None, "No username provided")
     else:
-        print "Logging in"
+        print "Logging in as ", username
         reader.init()
 
         with open("/tmp/cookies.txt", "w") as text_file:
             text_file.write(reader.opener.get_cookies())
         
-        result = reader.login(os.environ['username'], os.environ['password'])
+        result = reader.login(username, password)
 
         if "The userID or password could not be validated" in result:
             print "Bad User ID or password"
@@ -58,7 +61,7 @@ def index():
 
 @app.route('/logout')
 def logout():
-    reader, error = get_reader(True)
+    reader, error = get_reader(None, None, True)
     if reader is None:
         return jsonify({'result': "Session not found"})
     close_reader(reader)
@@ -72,10 +75,10 @@ def test():
 
 @app.route('/search', methods=['POST'])
 def search():
-    if request.form['password'] != os.environ['password']:
-        return "Password does not match the one stored in Iowa CRS app"
+    username = request.form['username']
+    password = request.form['password']
 
-    reader, error = get_reader()
+    reader, error = get_reader(username, password)
     if reader is None:
         return error
 
