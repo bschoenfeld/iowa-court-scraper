@@ -7,19 +7,29 @@ import ast
 import crs
 import json
 import os
-import parser
+import case_parser
 
 app = Flask(__name__)
 app.secret_key = "NOTASECRET"
 
-def get_reader():
+def get_reader(use_cookie_file=False):
     reader = Reader(Opener())
     if 'cookies' in session:
         print "Loading cookies"
         reader.opener.load_cookies(session['cookies'])
+    elif use_cookie_file:
+        print "Loading cookies from file"
+        with open("/tmp/cookies.txt", "r") as text_file:
+            cookies = text_file.read()
+            print cookies
+            reader.opener.load_cookies(cookies)
     else:
         print "Logging in"
         reader.init()
+
+        with open("/tmp/cookies.txt", "w") as text_file:
+            text_file.write(reader.opener.get_cookies())
+        
         result = reader.login(os.environ['username'], os.environ['password'])
 
         if "The userID or password could not be validated" in result:
@@ -46,6 +56,20 @@ def close_reader(reader):
 def index():
 	return render_template('start.html')
 
+@app.route('/logout')
+def logout():
+    reader, error = get_reader(True)
+    if reader is None:
+        return jsonify({'result': "Session not found"})
+    close_reader(reader)
+    return jsonify({'result': "Done"})
+
+@app.route('/test')
+def test():
+    print "Parsing results"
+    cases = case_parser.parse_search(None)
+    return jsonify({'result': "Done"})
+
 @app.route('/search', methods=['POST'])
 def search():
     if request.form['password'] != os.environ['password']:
@@ -67,7 +91,7 @@ def search():
     #    result = text_file.read()
 
     print "Parsing results"
-    cases = parser.parse_search(result)
+    cases = case_parser.parse_search(result)
 
     case_dict = {}
     for case in cases:
@@ -97,22 +121,22 @@ def get_case_details():
     print case
 
     result = reader.case_summary(case['id'])
-    parser.parse_case_summary(result, case)
+    case_parser.parse_case_summary(result, case)
 
     result = reader.case_charges()
-    parser.parse_case_charges(result, case)
+    case_parser.parse_case_charges(result, case)
 
     result = reader.case_financials()
-    parser.parse_case_financials(result, case)
+    case_parser.parse_case_financials(result, case)
 
     #with open("cases/" + case['id'] + "_summary.html", "r") as text_file:
-    #    parser.parse_case_summary(text_file.read(), case)
+    #    case_parser.parse_case_summary(text_file.read(), case)
 
     #with open("cases/" + case['id'] + "_charges.html", "r") as text_file:
-    #    parser.parse_case_charges(text_file.read(), case)
+    #    case_parser.parse_case_charges(text_file.read(), case)
 
     #with open("cases/" + case['id'] + "_financials.html", "r") as text_file:
-    #    parser.parse_case_financials(text_file.read(), case)
+    #    case_parser.parse_case_financials(text_file.read(), case)
     
     return jsonify(case)
 
