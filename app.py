@@ -81,6 +81,9 @@ def search():
     username = request.form['username']
     password = request.form['password']
 
+    if not username.startswith("ILA"):
+        return "Invalid Username"
+
     reader, error = get_reader(username, password)
     if reader is None:
         return error
