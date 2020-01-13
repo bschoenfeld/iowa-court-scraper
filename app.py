@@ -12,6 +12,9 @@ import case_parser
 app = Flask(__name__)
 app.secret_key = "NOTASECRET"
 
+tmp_dir = '/tmp/'
+tmp_dir = '.\\tmp\\'
+
 def get_reader(username=None, password=None, use_cookie_file=False):
     reader = Reader(Opener())
     if 'cookies' in session:
@@ -19,7 +22,7 @@ def get_reader(username=None, password=None, use_cookie_file=False):
         reader.opener.load_cookies(session['cookies'])
     elif use_cookie_file:
         print("Loading cookies from file")
-        with open("/tmp/cookies.txt", "r") as text_file:
+        with open(tmp_dir + "cookies.txt", "rb") as text_file:
             cookies = text_file.read()
             print(cookies)
             reader.opener.load_cookies(cookies)
@@ -30,7 +33,7 @@ def get_reader(username=None, password=None, use_cookie_file=False):
         print("Logging in as ", username)
         reader.init()
 
-        with open("/tmp/cookies.txt", "w") as text_file:
+        with open(tmp_dir + "cookies.txt", "wb") as text_file:
             text_file.write(reader.opener.get_cookies())
         
         result = reader.login(username, password)
@@ -99,13 +102,14 @@ def search():
 
     case_dict = {}
     for case in cases:
-        if not case['dob']: continue
-        key = "{}-{}-{} {}".format(
-            case['dob'].split('/')[2],
-            case['dob'].split('/')[0],
-            case['dob'].split('/')[1],
-            case['name']
-        )
+        key = 'DOB-UNKNOWN'
+        if case['dob']:
+            key = "{}-{}-{} {}".format(
+                case['dob'].split('/')[2],
+                case['dob'].split('/')[0],
+                case['dob'].split('/')[1],
+                case['name']
+            )
         if key not in case_dict:
             case_dict[key] = []
         case_dict[key].append(case['id'])
@@ -173,7 +177,7 @@ def generate_crs():
         crs.process_case(case, ws, row)
         row += 1
 
-    fp = "/tmp/CRS 2.3.3.xlsx"
+    fp = tmp_dir + "CRS 2.3.3.xlsx"
     wb.save(fp)
     session['file'] = fp
     return jsonify({'result': "success"})
