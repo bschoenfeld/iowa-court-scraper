@@ -18,19 +18,19 @@ tmp_dir = '.\\tmp\\'
 def get_reader(username=None, password=None, use_cookie_file=False):
     reader = Reader(Opener())
     if 'cookies' in session:
-        print("Loading cookies")
+        print "Loading cookies"
         reader.opener.load_cookies(session['cookies'])
     elif use_cookie_file:
-        print("Loading cookies from file")
-        with open(tmp_dir + "cookies.txt", "rb") as text_file:
+        print "Loading cookies from file"
+        with open(tmp_dir + "cookies.txt", "r") as text_file:
             cookies = text_file.read()
-            print(cookies)
+            print cookies
             reader.opener.load_cookies(cookies)
     elif username is None:
-        print("Cannot login, no username provided")
+        print "Cannot login, no username provided"
         return (None, "No username provided")
     else:
-        print("Logging in as ", username)
+        print "Logging in as ", username
         reader.init()
 
         with open(tmp_dir + "cookies.txt", "wb") as text_file:
@@ -39,22 +39,22 @@ def get_reader(username=None, password=None, use_cookie_file=False):
         result = reader.login(username, password)
 
         if "The userID or password could not be validated" in result:
-            print("Bad User ID or password")
+            print "Bad User ID or password"
             return (None, "Bad User ID or password")
 
         if "Concurrent Login Error" in result:
-            print("User already logged in")
+            print "User already logged in"
             return (None, "User already logged in")
 
-        print("Logged in")
+        print "Logged in"
     return (reader, "")
 
 def sleep_reader(reader):
-    print("Saving cookies")
+    print "Saving cookies"
     session['cookies'] = reader.opener.get_cookies()
 
 def close_reader(reader):
-    print("Logging off")
+    print "Logging off"
     reader.logoff()
     session.pop('cookies', None)
 
@@ -72,7 +72,7 @@ def logout():
 
 @app.route('/test')
 def test():
-    print("Parsing results")
+    print "Parsing results"
     cases = case_parser.parse_search(None)
     return jsonify({'result': "Done"})
 
@@ -89,7 +89,7 @@ def search():
     middlename = request.form['middlename']
     lastname = request.form['lastname']
 
-    print("Searching ", firstname, middlename, lastname)
+    print "Searching ", firstname, middlename, lastname
     result = reader.search(firstname, middlename, lastname)
     sleep_reader(reader)
 
@@ -97,7 +97,7 @@ def search():
     #with open("search_results.html", "r") as text_file:
     #    result = text_file.read()
 
-    print("Parsing results")
+    print "Parsing results"
     cases, too_many_results = case_parser.parse_search(result)
 
     case_dict = {}
@@ -126,7 +126,7 @@ def get_case_details():
         return error
 
     case = {'id': request.form['caseId']}
-    print(case)
+    print case
 
     result = reader.case_summary(case['id'])
     case_parser.parse_case_summary(result, case)
@@ -173,7 +173,7 @@ def generate_crs():
     row = 4
 
     for case in data['cases']:
-        print("Adding " + case['id'])
+        print "Adding " + case['id']
         crs.process_case(case, ws, row)
         row += 1
 
