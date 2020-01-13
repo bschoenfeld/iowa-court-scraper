@@ -105,7 +105,7 @@ def search():
 
     case_dict = {}
     for case in cases:
-        key = 'DOB-UNKNOWN'
+        key = 'DOB-UNKNOWN ' + case['name']
         if case['dob']:
             key = "{}-{}-{} {}".format(
                 case['dob'].split('/')[2],
