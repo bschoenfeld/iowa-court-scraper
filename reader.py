@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+import urllib
 
 BASE_URL = "https://www.iowacourts.state.ia.us/ESAWebApp/"
 
@@ -15,7 +15,7 @@ class Reader:
 
     def login(self, username, password):
         url = build_url("EUACustomLoginServlet")
-        data = urlencode([
+        data = urllib.urlencode([
             ('userid', username),
             ('password', password),
             ('agency', "JUDICIAL"),
@@ -26,14 +26,14 @@ class Reader:
 
     def logoff(self):
         url = build_url("EPALogout")
-        data = urlencode([
+        data = urllib.urlencode([
             ('logoffButton', "Logoff")
         ])
         return self.opener.open(url, data).read()
 
     def search(self, firstname, middlename, lastname):
         url = build_url("TrialCaseSearchResultServlet")
-        data = urlencode([
+        data = urllib.urlencode([
             ('searchtype', "N"),
             ('last', lastname),
             ('first', firstname),
