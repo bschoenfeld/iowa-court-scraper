@@ -1,7 +1,10 @@
 from bs4 import BeautifulSoup
 
+tmp_dir = '/tmp/'
+tmp_dir = '.\\tmp\\'
+
 def parse_search(html):
-    with open("/tmp/search_results.html", "w") as text_file:
+    with open(tmp_dir + "search_results.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
     too_many_results = len(soup.find_all(text="Your query returned more than 200 records.")) > 0
@@ -25,13 +28,13 @@ def parse_search(html):
     return (cases, too_many_results)
 
 def parse_case_summary(html, case):
-    with open("/tmp/" + case['id'] + "_summary.html", "w") as text_file:
+    with open(tmp_dir + case['id'] + "_summary.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
     case['county'] = soup.find_all('tr')[2].find_all('td')[1].string
 
 def parse_case_charges(html, case):
-    with open("/tmp/" + case['id'] + "_charges.html", "w") as text_file:
+    with open(tmp_dir + case['id'] + "_charges.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
     charges = []
@@ -81,7 +84,7 @@ def parse_case_charges(html, case):
     case['charges'] = charges
 
 def parse_case_financials(html, case):
-    with open("/tmp/" + case['id'] + "_financials.html", "w") as text_file:
+    with open(tmp_dir + case['id'] + "_financials.html", "w") as text_file:
         text_file.write(html)
     soup = BeautifulSoup(html, 'html.parser')
     financials = []
