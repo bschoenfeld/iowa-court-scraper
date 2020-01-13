@@ -83,6 +83,9 @@ def get_finance_column(detail):
     if "THIRD PARTY" in detail:
         return "P" # THIRD PARTY
 
+    if "ROOM/BOARD" in detail:
+        return "N" # JAIL / ROOM & BOARD
+
     if "SHERIFF" in detail:
         return "Q" # SHERIFF
 
