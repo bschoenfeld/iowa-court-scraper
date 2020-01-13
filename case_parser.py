@@ -13,7 +13,7 @@ def parse_search(html):
     cases = []
     for row in soup.find_all('tr'):
         cols = row.find_all('td')
-        if len(cols) != 5:
+        if len(cols) != 5 or cols[4].string != "DEFENDANT":
             continue
         case = {
             'id': list(cols[0].stripped_strings)[0].replace(u'\xa0', u' '),
