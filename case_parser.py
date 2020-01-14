@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 
 tmp_dir = '/tmp/'
-tmp_dir = '.\\tmp\\'
+#tmp_dir = '.\\tmp\\'
 
 def parse_search(html):
     with open(tmp_dir + "search_results.html", "w") as text_file:

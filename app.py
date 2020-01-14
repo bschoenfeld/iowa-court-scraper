@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = "NOTASECRET"
 
 tmp_dir = '/tmp/'
-tmp_dir = '.\\tmp\\'
+#tmp_dir = '.\\tmp\\'
 
 def get_reader(username=None, password=None, use_cookie_file=False):
     reader = Reader(Opener())
