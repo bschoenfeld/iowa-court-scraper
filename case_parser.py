@@ -13,7 +13,7 @@ def parse_search(html):
     cases = []
     for row in soup.find_all('tr'):
         cols = row.find_all('td')
-        if len(cols) != 5 or cols[4].string != "DEFENDANT":
+        if len(cols) != 5:
             continue
         case = {
             'id': list(cols[0].stripped_strings)[0].replace(u'\xa0', u' '),
@@ -23,6 +23,9 @@ def parse_search(html):
             'role': cols[4].string
         }
         if case['id'] == 'Case ID':
+            continue
+        if any([case['id'] == c['id'] for c in cases]):
+            print "Supressing duplicate case id", case['id']
             continue
         cases.append(case)
     return (cases, too_many_results)
