@@ -33,16 +33,16 @@ You'll need
 This guide assumes you are using Windows
 
 * Clone the source code
-* Open a powershell window and cd to the source directory
+* Open a powershell window and cd to the source directory  
 `> cd C:\Users\BenSchoenfeld\Documents\GitHub\iowa-court-scraper\`
-* Create a virtual environment
+* Create a virtual environment  
 `> C:\Python27\Scripts\virtualenv.exe venv`
-* Install the libraries
+* Install the libraries  
 `> .\venv\Scripts\pip.exe install -r .\requirements.txt`
-* Run the app
+* Run the app  
 `> .\venv\Scripts\python.exe .\app.py`
 
-You should get a message in your console that the app is running
+You should get a message in your console that the app is running  
 ` * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)`
 
 Open a browser, go to the url, and use the website to create a spreadsheet.
