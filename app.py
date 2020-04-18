@@ -72,12 +72,6 @@ def logout():
     session.pop('cookies', None)
     return redirect(url_for('index'))
 
-@app.route('/test')
-def test():
-    print "Parsing results"
-    cases = case_parser.parse_search(None)
-    return jsonify({'result': "Done"})
-
 @app.route('/search', methods=['POST'])
 def search():
     username = request.form['username']
