@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, send_file, session
+from flask import Flask, jsonify, render_template, request, send_file, session, url_for, redirect
 from opener import Opener
 from openpyxl import load_workbook
 from pprint import pprint
@@ -8,12 +8,14 @@ import crs
 import json
 import os
 import case_parser
+import platform
 
 app = Flask(__name__)
 app.secret_key = "NOTASECRET"
 
 tmp_dir = '/tmp/'
-#tmp_dir = '.\\tmp\\'
+if platform.system() == 'Windows':
+    tmp_dir = '.\\tmp\\'
 
 def get_reader(username=None, password=None, use_cookie_file=False):
     reader = Reader(Opener())
@@ -65,10 +67,10 @@ def index():
 @app.route('/logout')
 def logout():
     reader, error = get_reader(None, None, True)
-    if reader is None:
-        return jsonify({'result': "Session not found"})
-    close_reader(reader)
-    return jsonify({'result': "Done"})
+    if reader is not None:
+        reader.logoff()
+    session.pop('cookies', None)
+    return redirect(url_for('index'))
 
 @app.route('/test')
 def test():
