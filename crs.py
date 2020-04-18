@@ -118,7 +118,7 @@ def process_case(case, worksheet, row):
     if charge is None:
         return
     
-    worksheet['C' + i] = charge['offenseDate']
+    #worksheet['C' + i] = charge['offenseDate']
     worksheet['D' + i] = charge['dispositionDate']
     worksheet['E' + i] = charge['description']
     worksheet['G' + i] = charge['code']
