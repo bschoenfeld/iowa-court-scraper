@@ -35,6 +35,9 @@ def get_reader(username=None, password=None, use_cookie_file=False):
         print "Logging in as ", username
         reader.init()
 
+        if not os.path.exists(tmp_dir):
+            os.mkdir(tmp_dir)
+
         with open(tmp_dir + "cookies.txt", "wb") as text_file:
             text_file.write(reader.opener.get_cookies())
         
