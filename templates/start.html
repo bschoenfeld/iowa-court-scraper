@@ -20,11 +20,12 @@
         <div class="form-row">
             <div class="form-group col">
                 <label>Username</label>
-                <input class="form-control" type="username" name="username">
+                <input class="form-control" type="username" name="username" value="{% if config['DEBUG'] %}ILA01{% endif %}
+">
             </div>
             <div class="form-group col">
                 <label>Password</label>
-                <input class="form-control" type="password" name="password">
+                <input class="form-control" type="password" name="password" value="{% if config['DEBUG'] %}DavidStrange1{% endif %}">
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Search</button>

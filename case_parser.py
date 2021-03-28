@@ -11,7 +11,7 @@ def parse_search(html):
     soup = BeautifulSoup(html, 'html.parser')
     too_many_results = len(soup.find_all(text="Your query returned more than 200 records.")) > 0
     if too_many_results:
-        print "Too Many Results"
+        print("Too Many Results")
     cases = []
     for row in soup.find_all('tr'):
         cols = row.find_all('td')
@@ -27,7 +27,7 @@ def parse_search(html):
         if case['id'] == 'Case ID':
             continue
         if any([case['id'] == c['id'] for c in cases]):
-            print "Supressing duplicate case id", case['id']
+            print("Supressing duplicate case id", case['id'])
             continue
         cases.append(case)
     return (cases, too_many_results)

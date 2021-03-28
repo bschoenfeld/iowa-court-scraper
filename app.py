@@ -1,71 +1,114 @@
 from flask import Flask, jsonify, render_template, request, send_file, session, url_for, redirect
-from opener import Opener
 from openpyxl import load_workbook
-from pprint import pprint
 from reader import Reader
-import ast
 import crs
 import json
 import os
 import case_parser
-import platform
+import logging
+from logging.config import dictConfig
+import path
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {
+        'flask': {
+            'class': 'logging.FileHandler',
+            'filename': path.get_log('flask'),
+            'mode': 'w',
+            # 'maxBytes': 1024,
+            # 'backupCount': 1
+        },
+        'http': {
+            'class': 'logging.FileHandler',
+            'filename': path.get_log('http'),
+            'mode': 'w',
+            # 'maxBytes': 1024,
+            # 'backupCount': 1
+        },
+        'stdout': {
+            'class': 'logging.StreamHandler',
+            'stream': 'stdout'
+        },
+    },
+    'loggers': {
+        'root': {
+            'level': 'INFO',
+            'formatters': 'default',
+            'handlers': ['flask'],
+            'propagate': False
+        },
+        'http': {
+            'level': 'INFO',
+            'formatters': 'default',
+            'handlers': ['http'],
+            'propagate': False
+        },
+        'app': {
+            'level': 'INFO',
+            'formatters': 'default',
+            'handlers': ['stdout']
+        }
+    }
+})
 
 app = Flask(__name__)
-app.secret_key = "NOTASECRET"
-
-tmp_dir = '/tmp/'
-if platform.system() == 'Windows':
-    tmp_dir = '.\\tmp\\'
+app.secret_key = "pair6RAUD.flid.rhip"
+tmp_dir = path.get_tmp()
 
 def get_reader(username=None, password=None, use_cookie_file=False):
-    reader = Reader(Opener())
+    reader = Reader()
+    # if cookies in session, we already logged in
     if 'cookies' in session:
-        print "Loading cookies"
-        reader.opener.load_cookies(session['cookies'])
-    elif use_cookie_file:
-        print "Loading cookies from file"
-        with open(tmp_dir + "cookies.txt", "r") as text_file:
-            cookies = text_file.read()
-            print cookies
-            reader.opener.load_cookies(cookies)
-    elif username is None:
-        print "Cannot login, no username provided"
+        reader.set_cookies(session['cookies'])
+        # if session active (adv page returns non-empty), use it
+        # otherwise relogin
+        if reader.check_session():
+            return reader, ""
+
+    if username is None:
+        print("Cannot login, no username provided")
         return (None, "No username provided")
     else:
-        print "Logging in as ", username
+        print("Logging in as ", username)
         reader.init()
-
         if not os.path.exists(tmp_dir):
             os.mkdir(tmp_dir)
 
-        with open(tmp_dir + "cookies.txt", "wb") as text_file:
-            text_file.write(reader.opener.get_cookies())
-        
-        result = reader.login(username, password)
+        # with open(tmp_dir + "cookies.txt", "wb") as text_file:
+        #     text_file.write(reader.opener.get_cookies())
 
+        result = reader.login(username, password)
         if "The userID or password could not be validated" in result:
-            print "Bad User ID or password"
+            print("Bad User ID or password")
             return (None, "Bad User ID or password")
 
         if "Concurrent Login Error" in result:
-            print "User already logged in"
+            print("User already logged in")
             return (None, "User already logged in")
 
-        print "Logged in"
-    return (reader, "")
+        print("Logged in")
+    return reader, ""
+
 
 def sleep_reader(reader):
-    print "Saving cookies"
-    session['cookies'] = reader.opener.get_cookies()
+    cookies = reader.get_cookies()
+    if len(cookies):
+        logging.info(f'Saving cookies {cookies}')
+    session['cookies'] = cookies
 
 def close_reader(reader):
-    print "Logging off"
+    logging.info("Logging off")
     reader.logoff()
     session.pop('cookies', None)
 
+
 @app.route('/')
 def index():
-	return render_template('start.html')
+    return render_template('start.html')
 
 @app.route('/logout')
 def logout():
@@ -91,7 +134,7 @@ def search():
     middlename = request.form['middlename']
     lastname = request.form['lastname']
 
-    print "Searching ", firstname, middlename, lastname
+    logging.info(f'Searching {firstname}, {middlename}, {lastname}', )
     result = reader.search(firstname, middlename, lastname)
     sleep_reader(reader)
 
@@ -99,7 +142,8 @@ def search():
     #with open("search_results.html", "r") as text_file:
     #    result = text_file.read()
 
-    print "Parsing results"
+    logging.info("Parsing results")
+    logging.info(result)
     cases, too_many_results = case_parser.parse_search(result)
 
     case_dict = {}
@@ -128,7 +172,7 @@ def get_case_details():
         return error
 
     case = {'id': request.form['caseId']}
-    print case
+    print(case)
 
     result = reader.case_summary(case['id'])
     case_parser.parse_case_summary(result, case)
@@ -175,7 +219,7 @@ def generate_crs():
     row = 4
 
     for case in data['cases']:
-        print "Adding " + case['id']
+        print("Adding " + case['id'])
         crs.process_case(case, ws, row)
         row += 1
 
@@ -192,4 +236,4 @@ def pluralize(number, singular = '', plural = 's'):
         return plural
 
 if __name__ == "__main__":
-	app.run()
+    app.run()
