@@ -7,7 +7,7 @@ import os
 import case_parser
 import logging
 from logging.config import dictConfig
-import path
+import path_helper
 
 dictConfig({
     'version': 1,
@@ -17,14 +17,14 @@ dictConfig({
     'handlers': {
         'flask': {
             'class': 'logging.FileHandler',
-            'filename': path.get_log('flask'),
+            'filename': path_helper.get_log('flask'),
             'mode': 'w',
             # 'maxBytes': 1024,
             # 'backupCount': 1
         },
         'http': {
             'class': 'logging.FileHandler',
-            'filename': path.get_log('http'),
+            'filename': path_helper.get_log('http'),
             'mode': 'w',
             # 'maxBytes': 1024,
             # 'backupCount': 1
@@ -57,12 +57,13 @@ dictConfig({
 
 app = Flask(__name__)
 app.secret_key = "pair6RAUD.flid.rhip"
-tmp_dir = path.get_tmp()
+tmp_dir = path_helper.get_tmp()
 
 def get_reader(username=None, password=None, use_cookie_file=False):
     reader = Reader()
     # if cookies in session, we already logged in
     if 'cookies' in session:
+        logging.info("cookies found in session. authorizing")
         reader.set_cookies(session['cookies'])
         # if session active (adv page returns non-empty), use it
         # otherwise relogin
@@ -142,8 +143,7 @@ def search():
     #with open("search_results.html", "r") as text_file:
     #    result = text_file.read()
 
-    logging.info("Parsing results")
-    logging.info(result)
+    logging.info(f'Search Result: {len(result)} b. Parsing...')
     cases, too_many_results = case_parser.parse_search(result)
 
     case_dict = {}
@@ -214,7 +214,7 @@ def generate_crs():
 
     data = json.loads(request.data)
 
-    wb = load_workbook('CRS 2.3.3.xlsx')
+    wb = load_workbook(f'{path_helper.get_dir()}/CRS 2.3.3.xlsx')
     ws = wb['CASE DATA']
     row = 4
 

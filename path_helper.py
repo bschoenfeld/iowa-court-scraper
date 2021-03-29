@@ -2,7 +2,7 @@ import os
 import tempfile
 
 
-def cwd():
+def get_dir():
     return os.path.dirname(os.path.realpath(__file__))
 
 
@@ -15,7 +15,7 @@ def get_log(name: str):
     -------
     string: valid full path for log file
     """
-    return os.path.normpath(f'{cwd()}/logs/{name}.log')
+    return os.path.normpath(f'{get_dir()}/logs/{name}.log')
 
 
 def get_tmp():
